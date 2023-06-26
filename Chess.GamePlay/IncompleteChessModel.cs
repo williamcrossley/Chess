@@ -175,7 +175,21 @@ namespace Chess.GamePlay
 
         public bool IsValidMovementForPawn(char[][] board, Move move, Player player)
         {
-            return true;
+            const int whiteStartRow = 2;
+            const int blackStartRow = 7;
+            int playerInt = player == Player.White ? 1 : -1;
+            int rowDifference = move.toRow - move.fromRow;
+            int columnDifference = move.toColumn - move.fromColumn;
+
+            if (rowDifference != 0) //if not moved horizontally (captures caught in else if)
+            {
+
+            }
+            else if (Math.Abs(rowDifference) == 1 && Math.Abs(columnDifference) == playerInt) //if move if a capture
+            {
+                if (board[move.toRow][move.toColumn] != '.') return true;
+                return false;
+            }
         }
 
         /// ----------------------------------------------------------------------------------
