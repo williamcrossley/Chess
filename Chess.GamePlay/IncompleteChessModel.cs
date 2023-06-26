@@ -161,7 +161,7 @@ namespace Chess.GamePlay
 
             if (Math.Abs(rowDifference) == Math.Abs(columnDifference))
             {
-                return UnoccupiedPathCheck(board, move.fromRow, move.fromColumn, Math.Abs(rowDifference), Math.Clamp(columnDifference, -1, 1), 0);
+                return UnoccupiedPathCheck(board, move.fromRow, move.fromColumn, Math.Abs(rowDifference), Math.Clamp(rowDifference, -1, 1), Math.Clamp(columnDifference, -1, 1));
             }
             return false;
         }
