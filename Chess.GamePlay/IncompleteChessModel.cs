@@ -119,10 +119,18 @@ namespace Chess.GamePlay
         /// ----------- Edit from here for Part 1: Piece Logic -------------------------------
         /// ----------------------------------------------------------------------------------
 
+        private bool UnoccupiedPathCheck(char[][] board, int startRow, int startColumn, int moveLength, int incrementRow, int incrementColumn) 
+        {
+            for(int i = 1; i < moveLength; i++) 
+            {
+                if (board[startRow + incrementRow * i][startColumn + incrementColumn * i] != '.') return false;
+            }
+            return true;
+        }
         public bool IsValidMovementForKnight(char[][] board, Move move, Player player)
         {
-            int rowDifference = move.fromRow - move.toRow;
-            int columnDifference = move.fromColumn - move.toColumn;
+            int rowDifference = move.toRow - move.fromRow;
+            int columnDifference = move.toColumn - move.fromColumn;
 
             if (Math.Abs(rowDifference) == 1 && Math.Abs(columnDifference) == 2) return true;
             if (Math.Abs(rowDifference) == 2 && Math.Abs(columnDifference) == 1) return true;
@@ -132,21 +140,28 @@ namespace Chess.GamePlay
 
         public bool IsValidMovementForRook(char[][] board, Move move, Player player)
         {
-            int rowDifference = move.fromRow - move.toRow;
-            int columnDifference = move.fromColumn - move.toColumn;
+            int rowDifference = move.toRow - move.fromRow;
+            int columnDifference = move.toColumn - move.fromColumn;
 
-            if (rowDifference == 0 && columnDifference != 0 || rowDifference != 0 && columnDifference == 0) return true;
+            if (rowDifference == 0 && columnDifference != 0)
+            {
+                return UnoccupiedPathCheck(board, move.fromRow, move.fromColumn, Math.Abs(columnDifference), 0, Math.Clamp(columnDifference, -1, 1));
+            }
+            if(rowDifference != 0 && columnDifference == 0)
+            {
+                return UnoccupiedPathCheck(board, move.fromRow, move.fromColumn, Math.Abs(rowDifference), Math.Clamp(rowDifference, -1, 1), 0);
+            }
             return false;
         }
 
         public bool IsValidMovementForBishop(char[][] board, Move move, Player player)
         {
-            int rowDifference = move.fromRow - move.toRow;
-            int columnDifference = move.fromColumn - move.toColumn;
+            int rowDifference = move.toRow - move.fromRow;
+            int columnDifference = move.toColumn - move.fromColumn;
 
             if (Math.Abs(rowDifference) == Math.Abs(columnDifference))
             {
-                if (rowDifference != 0 && columnDifference != 0) return true;
+                return UnoccupiedPathCheck(board, move.fromRow, move.fromColumn, Math.Abs(rowDifference), Math.Clamp(columnDifference, -1, 1), 0);
             }
             return false;
         }
@@ -160,7 +175,7 @@ namespace Chess.GamePlay
 
         public bool IsValidMovementForPawn(char[][] board, Move move, Player player)
         {
-            test
+            return true;
         }
 
         /// ----------------------------------------------------------------------------------
