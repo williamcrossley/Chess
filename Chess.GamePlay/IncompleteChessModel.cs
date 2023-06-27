@@ -203,33 +203,61 @@ namespace Chess.GamePlay
 
         public bool IsInCheck(char[][] board, Player player)
         {
-            return false; // todo implement this method.
+            Player opponent = player == Player.White ? Player.Black : Player.White;
+
+            //find king
+            int[] kingpos = FindKingPosition(board, player);
+            
+            //loop through board, when find char != '.', if !isPieceOwnedByPlayer:
+            for(int row = 0; row < board.Length; row++) 
+            {
+                for(int col = 0;  col < board.Length; col++)
+                {
+                    if (board[row][col] != '.' && IsPieceOwnedByPlayer(board[row][col], opponent))
+                    {
+                        if(IsPieceMoveLegal(board, new Move(row, col, kingpos[0], kingpos[1]), player )) return true;
+                    }
+                }
+            }
+            return false;
         }
 
         public bool IsMoveIntoCheck(char[][] board, Move move, Player player)
-        {
-            return false; // todo implement this method.
+        {   //IsMoveLegal will fail if invalid move from the other methods, so we can assume this move was vaild
+            char[][] newboard = board;
+            newboard[move.toRow][move.toColumn] = newboard[move.fromRow][move.fromColumn];
+            newboard[move.fromRow][move.fromColumn] = '.';
+            if (IsInCheck(newboard, player)) return true;
+            return false;
+
         }
 
         public bool IsGameOver(char[][] board, Player player)
         {
-            // todo update this method - the current implementation is incorrect and does not refer to the concept of "check".
-
+            //
             GridCharacter targetPiece = player == Player.White ? GridCharacter.WhiteKing : GridCharacter.BlackKing;
 
             // Search for the correct king (targetPiece).
-            for (int i=0; i<board.Length; i++)
+            int[]kingpos = FindKingPosition(board, player);
+
+            return true;
+        }
+
+        private int[] FindKingPosition(char[][] board, Player player)
+        {
+            GridCharacter targetPiece = player == Player.White ? GridCharacter.WhiteKing : GridCharacter.BlackKing;
+
+            for (int i = 0; i < board.Length; i++)
             {
-                for (int j=0; j<board[i].Length; j++)
+                for (int j = 0; j < board[i].Length; j++)
                 {
                     if (board[i][j] == (char)targetPiece)
                     {
-                        return false;
+                        return new int[] { i, j };
                     }
                 }
             }
-
-            return true;
+            return new int[] { -1, -1 };
         }
     }
 }
