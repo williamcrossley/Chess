@@ -89,7 +89,7 @@ namespace Chess.GamePlay
                 case "q":
                     return IsValidMovementForQueen(board, move, turn);
                 default:
-                    return true;
+                    return false;
             }
         }
 
@@ -234,11 +234,46 @@ namespace Chess.GamePlay
 
         public bool IsGameOver(char[][] board, Player player)
         {
-            //
-            GridCharacter targetPiece = player == Player.White ? GridCharacter.WhiteKing : GridCharacter.BlackKing;
+            //data needed: king pos, checking piece(s) pos and type, opposition
+            //need to check:
+            //is piece in check?       run IsInCheck
+            //can king move?        run IsMoveIntoCheck for each valid king move
+            //combine block check/capture checking piece        get path to check (include checking piece pos)  -> for all player pieces
+            //return true
+            //return false
 
-            // Search for the correct king (targetPiece).
-            int[]kingpos = FindKingPosition(board, player);
+            GridCharacter targetPiece = player == Player.White ? GridCharacter.WhiteKing : GridCharacter.BlackKing;
+            int[] kingPos = FindKingPosition(board, player);
+            int checkingPiecesCount = 0;
+
+            //king move offsets
+            int[] kingRowOffset = { -1, -1, -1, 0, 0, 0, 1, 1, 1 };
+            int[] kingColOffset = { -1, 0, 1, -1, 0, 1, -1, 0, 1 };
+
+            if (IsInCheck(board, player))
+            {
+                for (int row = 0; row < board.Length; row++)
+                { //count all checking pieces
+                    for (int col = 0; col < board.Length; col++)
+                    {
+                        if (IsPieceMoveLegal(board, new Move(row, col, kingPos[0], kingPos[1]), player)) checkingPiecesCount++;
+                    }
+                }
+
+                for (int i = 0; i < 8; i++) //check for valid king moves
+                {
+                    if (IsPieceMoveLegal(board, new Move(kingPos[0], kingPos[1], kingPos[0] + kingRowOffset[i], kingPos[1] + kingColOffset[i]), player)) return false;
+                }
+
+                //if the king cant move and is double checked, game over
+                if (checkingPiecesCount >= 2) return true;
+
+
+
+            }
+
+
+            
 
             return true;
         }
