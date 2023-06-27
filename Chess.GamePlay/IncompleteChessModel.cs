@@ -120,7 +120,7 @@ namespace Chess.GamePlay
         /// ----------------------------------------------------------------------------------
 
         private bool UnoccupiedPathCheck(char[][] board, int startRow, int startColumn, int moveLength, int incrementRow, int incrementColumn) 
-        {
+        { //checks all spaces in the path are clear. *not including destination square
             for(int i = 1; i < moveLength; i++) 
             {
                 if (board[startRow + incrementRow * i][startColumn + incrementColumn * i] != '.') return false;
@@ -175,21 +175,26 @@ namespace Chess.GamePlay
 
         public bool IsValidMovementForPawn(char[][] board, Move move, Player player)
         {
-            const int whiteStartRow = 2;
-            const int blackStartRow = 7;
+            int pawnStartRank = player == Player.White ? 2 : 7;
             int playerInt = player == Player.White ? 1 : -1;
             int rowDifference = move.toRow - move.fromRow;
             int columnDifference = move.toColumn - move.fromColumn;
 
-            if (rowDifference != 0) //if not moved horizontally (captures caught in else if)
+            if (columnDifference == 0) //if not moved horizontally (captures caught in else if)
             {
+                if (rowDifference == playerInt && board[move.toRow][move.toColumn] == '.') return true; //single space advance into open space
 
+                if (rowDifference == 2 * playerInt && move.fromRow == pawnStartRank) //double move on first pawn move
+                {
+                    if (board[move.fromRow + playerInt][move.fromColumn] == '.' && board[move.toRow + playerInt][move.fromColumn] == '.') return true; //check if path and destination is empty
+                }
             }
-            else if (Math.Abs(rowDifference) == 1 && Math.Abs(columnDifference) == playerInt) //if move if a capture
+            else if (Math.Abs(columnDifference) == 1 && rowDifference == playerInt) //if move if a capture
             {
                 if (board[move.toRow][move.toColumn] != '.') return true;
                 return false;
             }
+            return false;
         }
 
         /// ----------------------------------------------------------------------------------
