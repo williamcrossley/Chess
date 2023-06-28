@@ -192,7 +192,7 @@ namespace Chess.GamePlay
             }
             else if (Math.Abs(columnDifference) == 1 && rowDifference == playerInt) //if move if a capture
             {
-                if (board[move.toRow][move.toColumn] != '.') return true;
+                if (board[move.toRow][move.toColumn] != '.' && !IsPieceOwnedByPlayer(board[move.toRow][move.toColumn], player)) return true; //if the 
                 return false;
             }
             return false;
