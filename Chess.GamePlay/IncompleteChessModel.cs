@@ -235,24 +235,15 @@ namespace Chess.GamePlay
 
         public bool IsGameOver(char[][] board, Player player)
         {
-            //data needed: king pos, checking piece(s) pos and type, opposition
-            //need to check:
-            //is piece in check?       run IsInCheck
-            //can king move?        run IsMoveIntoCheck for each valid king move
-            //combine block check/capture checking piece        get path to check (include checking piece pos)  -> for all player pieces
-            //return true
-            //return false
-
-            GridCharacter targetPiece = player == Player.White ? GridCharacter.WhiteKing : GridCharacter.BlackKing;
-            int[] kingPos = FindKingPosition(board, player);
-            int checkingPiecesCount = 0;
-            ArrayList checkingPieces = new ArrayList(); //struct: <piece>, <row>, <col>...
-
 
             if (IsInCheck(board, player))
             {
+                int[] kingPos = FindKingPosition(board, player);
+                int checkingPiecesCount = 0;
+                ArrayList checkingPieces = new ArrayList(); //struct: <piece>, <row>, <col>... (would've been used for blocking/capture of checking piece)
+
                 for (int row = 0; row < board.Length; row++)
-                { //find all checking pieces
+                { //find all checking pieces (not needed yet)
                     for (int col = 0; col < board.Length; col++)
                     {
                         if (IsPieceMoveLegal(board, new Move(row, col, kingPos[0], kingPos[1]), player))
