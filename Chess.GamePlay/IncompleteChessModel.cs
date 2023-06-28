@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using System.Collections;
 
 namespace Chess.GamePlay
 {
@@ -245,37 +246,46 @@ namespace Chess.GamePlay
             GridCharacter targetPiece = player == Player.White ? GridCharacter.WhiteKing : GridCharacter.BlackKing;
             int[] kingPos = FindKingPosition(board, player);
             int checkingPiecesCount = 0;
+            ArrayList checkingPieces = new ArrayList(); //struct: <piece>, <row>, <col>...
 
-            //king move offsets
-            int[] kingRowOffset = { -1, -1, -1, 0, 0, 0, 1, 1, 1 };
-            int[] kingColOffset = { -1, 0, 1, -1, 0, 1, -1, 0, 1 };
 
             if (IsInCheck(board, player))
             {
                 for (int row = 0; row < board.Length; row++)
-                { //count all checking pieces
+                { //find all checking pieces
                     for (int col = 0; col < board.Length; col++)
                     {
-                        if (IsPieceMoveLegal(board, new Move(row, col, kingPos[0], kingPos[1]), player)) checkingPiecesCount++;
+                        if (IsPieceMoveLegal(board, new Move(row, col, kingPos[0], kingPos[1]), player))
+                        {
+                            checkingPiecesCount++;
+                            checkingPieces.Add(board[row][col]);
+                            checkingPieces.Add(row);
+                            checkingPieces.Add(col);
+                        }
                     }
                 }
 
-                for (int i = 0; i < 8; i++) //check for valid king moves
-                {
-                    if (IsPieceMoveLegal(board, new Move(kingPos[0], kingPos[1], kingPos[0] + kingRowOffset[i], kingPos[1] + kingColOffset[i]), player)) return false;
+                //king move offsets
+                int[] kingRowOffset = { -1, -1, -1, 0, 0, 0, 1, 1, 1 };
+                int[] kingColOffset = { -1, 0, 1, -1, 0, 1, -1, 0, 1 };
+
+                for (int i = 0; i < 8; i++)
+                { //check for valid king moves, if one exists, and that move results in no check, game is not over
+                    Move newKingMove = new Move(kingPos[0], kingPos[1], kingPos[0] + kingRowOffset[i], kingPos[1] + kingColOffset[i]);
+
+                    if (IsMoveWithinBoard(newKingMove))
+                    {
+                        if (IsPieceMoveLegal(board, newKingMove, player))
+                        {
+                            if (!IsMoveIntoCheck(board, newKingMove, player)) return false;
+                        }
+                    }
                 }
-
-                //if the king cant move and is double checked, game over
-                if (checkingPiecesCount >= 2) return true;
-
-
-
+              
+                return true;
+                
             }
-
-
-            
-
-            return true;
+            return false;
         }
 
         private int[] FindKingPosition(char[][] board, Player player)
