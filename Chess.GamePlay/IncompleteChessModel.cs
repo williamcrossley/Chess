@@ -271,6 +271,8 @@ namespace Chess.GamePlay
                         }
                     }
                 }
+
+                if (checkingPiecesCount >= 2) return true; //if double checked and the king cant move, game is over
               
                 return true;
                 
