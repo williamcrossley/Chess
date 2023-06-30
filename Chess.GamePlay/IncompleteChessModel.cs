@@ -275,7 +275,7 @@ namespace Chess.GamePlay
                 { //find all checking pieces (not needed yet, could be removed but will be needed when checking for blocks / captures)
                     for (int col = 0; col < board.Length; col++)
                     {
-                        if (IsPieceMoveLegal(board, new Move(row, col, kingPos[0], kingPos[1]), player))
+                        if (IsMoveLegal(board, new Move(row, col, kingPos[0], kingPos[1]), player == Player.White ? Player.Black : Player.White))
                         {
                             checkingPiecesCount++;
                             checkingPieces.Add(row);
@@ -288,8 +288,9 @@ namespace Chess.GamePlay
 
                 //get the path, this only runs if the king can't move AND there is 1 piece checking, otherwise the game isnt over, so we know checkingPieces only has 2 elements
                 int[][] checkingPaths = GetPiecePathPositions(board, new Move((int)checkingPieces[0], (int)checkingPieces[1], kingPos[0], kingPos[1]));
+
                 foreach (int[] pathSquare in checkingPaths)
-                {
+                {   
                     for (int row = 0; row < board.Length; row++)
                     {
                         for (int col = 0; col < board.Length; col++)
