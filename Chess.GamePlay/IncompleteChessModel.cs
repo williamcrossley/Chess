@@ -121,7 +121,7 @@ namespace Chess.GamePlay
         /// ----------------------------------------------------------------------------------
 
         private bool UnoccupiedPathCheck(char[][] board, int startRow, int startColumn, int moveLength, int incrementRow, int incrementColumn) 
-        { //checks all spaces in the path are clear. *not including destination square
+        { //checks all spaces in the path are clear. *not including destination square, this requires extra logic for capture / not capture
             for(int i = 1; i < moveLength; i++) 
             {
                 if (board[startRow + incrementRow * i][startColumn + incrementColumn * i] != '.') return false;
@@ -129,7 +129,7 @@ namespace Chess.GamePlay
             return true;
         }
         public bool IsValidMovementForKnight(char[][] board, Move move, Player player)
-        {
+        { //no path for knight, check only size of move is correct, again destination square availabilty is checked elsewhere
             int rowDifference = move.toRow - move.fromRow;
             int columnDifference = move.toColumn - move.fromColumn;
 
@@ -140,7 +140,7 @@ namespace Chess.GamePlay
         }
 
         public bool IsValidMovementForRook(char[][] board, Move move, Player player)
-        {
+        { //check direction and path there is clear
             int rowDifference = move.toRow - move.fromRow;
             int columnDifference = move.toColumn - move.fromColumn;
 
@@ -156,7 +156,7 @@ namespace Chess.GamePlay
         }
 
         public bool IsValidMovementForBishop(char[][] board, Move move, Player player)
-        {
+        { //check direction and path there is clear
             int rowDifference = move.toRow - move.fromRow;
             int columnDifference = move.toColumn - move.fromColumn;
 
@@ -168,7 +168,7 @@ namespace Chess.GamePlay
         }
 
         public bool IsValidMovementForQueen(char[][] board, Move move, Player player)
-        {
+        { 
             if (IsValidMovementForBishop(board, move, player)) return true;
             if (IsValidMovementForRook(board, move, player)) return true;
             return false;
@@ -177,8 +177,8 @@ namespace Chess.GamePlay
         public bool IsValidMovementForPawn(char[][] board, Move move, Player player)
         {
             int pawnStartRank = player == Player.White ? 6 : 1; //rows are indexed top -> bottom but displayed bottom -> top
-            int playerInt = player == Player.White ? -1 : 1;
-            int rowDifference = move.toRow - move.fromRow;
+            int playerInt = player == Player.White ? -1 : 1; //inversed from displayed board for same reason as above
+            int rowDifference = move.toRow - move.fromRow; 
             int columnDifference = move.toColumn - move.fromColumn;
             
             if (columnDifference == 0) //if not moved horizontally (captures caught in else if)
@@ -204,17 +204,15 @@ namespace Chess.GamePlay
 
         public bool IsInCheck(char[][] board, Player player)
         {
-            Player opponent = player == Player.White ? Player.Black : Player.White;
-
             //find king
             int[] kingpos = FindKingPosition(board, player);
             
-            //loop through board, when find char != '.', if !isPieceOwnedByPlayer:
+            //loop through board, when found char != '.', if !isPieceOwnedByPlayer, and can validly move to the kings square, player is in check
             for(int row = 0; row < board.Length; row++) 
             {
                 for(int col = 0;  col < board.Length; col++)
                 {
-                    if (board[row][col] != '.' && IsPieceOwnedByPlayer(board[row][col], opponent))
+                    if (board[row][col] != '.' && !IsPieceOwnedByPlayer(board[row][col], player))
                     {
                         if(IsPieceMoveLegal(board, new Move(row, col, kingpos[0], kingpos[1]), player )) return true;
                     }
@@ -235,6 +233,7 @@ namespace Chess.GamePlay
 
         public bool IsGameOver(char[][] board, Player player)
         {
+            //CURRENT: Program specs and tests do not account for blocking / capturing checking piece, will add that next.
 
             if (IsInCheck(board, player))
             {
