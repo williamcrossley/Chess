@@ -234,6 +234,7 @@ namespace Chess.GamePlay
         public bool IsGameOver(char[][] board, Player player)
         {
             //CURRENT: Program specs and tests do not account for blocking / capturing checking piece, will add that next.
+            //test
 
             if (IsInCheck(board, player))
             {
