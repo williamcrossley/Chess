@@ -225,14 +225,17 @@ namespace Chess.GamePlay
 
         public bool IsMoveIntoCheck(char[][] board, Move move, Player player)
         {   //IsMoveLegal will fail if invalid move from the other methods, so we can assume this move was vaild
+            //Hard copy board:
             char[][] newboard = new char[board.Length][];
-            for (int i = 0; i < board.Length; i++) //Had a bug with hard vs soft copy changing the real board
+            for (int i = 0; i < board.Length; i++)
             {
                 newboard[i] = new char[board[i].Length];
                 for (int j = 0; j < board[i].Length; j++) newboard[i][j] = board[i][j];
             }
+
             newboard[move.toRow][move.toColumn] = newboard[move.fromRow][move.fromColumn];
             newboard[move.fromRow][move.fromColumn] = '.';
+
             if (IsInCheck(newboard, player)) return true;
             return false;
 
