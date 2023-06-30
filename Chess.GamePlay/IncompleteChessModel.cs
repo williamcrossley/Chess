@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Collections;
-using System.Numerics;
+
 
 namespace Chess.GamePlay
 {
@@ -207,15 +207,16 @@ namespace Chess.GamePlay
         {
             //find king
             int[] kingpos = FindKingPosition(board, player);
-            
+            Player opponent = player == Player.White ? Player.Black : Player.White;
+
             //loop through board, when found char != '.', if !isPieceOwnedByPlayer, and can validly move to the kings square, player is in check
-            for(int row = 0; row < board.Length; row++) 
+            for (int row = 0; row < board.Length; row++)
             {
-                for(int col = 0;  col < board.Length; col++)
+                for (int col = 0; col < board.Length; col++)
                 {
                     if (board[row][col] != '.' && !IsPieceOwnedByPlayer(board[row][col], player))
                     {
-                        if(IsPieceMoveLegal(board, new Move(row, col, kingpos[0], kingpos[1]), player )) return true;
+                        if (IsPieceMoveLegal(board, new Move(row, col, kingpos[0], kingpos[1]), opponent)) return true;
                     }
                 }
             }
@@ -224,7 +225,12 @@ namespace Chess.GamePlay
 
         public bool IsMoveIntoCheck(char[][] board, Move move, Player player)
         {   //IsMoveLegal will fail if invalid move from the other methods, so we can assume this move was vaild
-            char[][] newboard = board;
+            char[][] newboard = new char[board.Length][];
+            for (int i = 0; i < board.Length; i++) //Had a bug with hard vs soft copy changing the real board
+            {
+                newboard[i] = new char[board[i].Length];
+                for (int j = 0; j < board[i].Length; j++) newboard[i][j] = board[i][j];
+            }
             newboard[move.toRow][move.toColumn] = newboard[move.fromRow][move.fromColumn];
             newboard[move.fromRow][move.fromColumn] = '.';
             if (IsInCheck(newboard, player)) return true;
@@ -234,30 +240,14 @@ namespace Chess.GamePlay
 
         public bool IsGameOver(char[][] board, Player player)
         {
-            //CURRENT: Program specs and tests do not account for blocking / capturing checking piece, will add that next.
 
             if (IsInCheck(board, player))
             {
                 int[] kingPos = FindKingPosition(board, player);
-                int checkingPiecesCount = 0;
-                ArrayList checkingPieces = new ArrayList(); //struct: <row>, <col>... (would've been used for blocking/capture of checking piece)
-
-                for (int row = 0; row < board.Length; row++)
-                { //find all checking pieces (not needed yet, could be removed but will be needed when checking for blocks / captures)
-                    for (int col = 0; col < board.Length; col++)
-                    {
-                        if (IsPieceMoveLegal(board, new Move(row, col, kingPos[0], kingPos[1]), player))
-                        {
-                            checkingPiecesCount++;
-                            checkingPieces.Add(row);
-                            checkingPieces.Add(col);
-                        }
-                    }
-                }
 
                 //king move offsets
-                int[] kingRowOffset = { -1, -1, -1, 0, 0, 0, 1, 1, 1 };
-                int[] kingColOffset = { -1, 0, 1, -1, 0, 1, -1, 0, 1 };
+                int[] kingRowOffset = { -1, -1, -1, 0, 0, 1, 1, 1 };
+                int[] kingColOffset = { -1, 0, 1, -1, 1, -1, 0, 1 };
 
                 for (int i = 0; i < 8; i++)
                 { //check for valid king moves, if one exists, and that move results in no check, game is not over
@@ -267,31 +257,49 @@ namespace Chess.GamePlay
                     {
                         if (IsPieceMoveLegal(board, newKingMove, player))
                         {
-                            if (!IsMoveIntoCheck(board, newKingMove, player)) return false;
-                        }
-                    }
-                }
-
-                if (checkingPiecesCount >= 2) return true; //if double checked and the king cant move, game is over
-
-                //get the path, this only runs if the king can't move AND there is 1 piece checking, otherwise the game isnt over, so we know checkingPieces only has 2 elements
-                int[][] checkingPaths = GetPiecePathPositions(board, new Move((int)checkingPieces[0], (int)checkingPieces[1], kingPos[0], kingPos[1]));
-                foreach (int[] pathSquare in checkingPaths)
-                {
-                    for (int row = 0; row < board.Length; row++)
-                    { 
-                        for (int col = 0; col < board.Length; col++)
-                        {
-                            if (IsPieceOwnedByPlayer(board[row][col], player) &&  IsPieceMoveLegal(board, new Move(row, col, pathSquare[0], pathSquare[1]), player)) 
+                            if (!IsMoveIntoCheck(board, newKingMove, player))
                             {
-                                //if the piece at row,col is the players and can move to the current path square, it can block the check or take the checking piece.
                                 return false;
                             }
                         }
                     }
                 }
-                
-                
+                //int checkingPiecesCount = 0;
+                //ArrayList checkingPieces = new ArrayList(); //struct: <row>, <col>... (would've been used for blocking/capture of checking piece)
+
+                //for (int row = 0; row < board.Length; row++)
+                //{ //find all checking pieces (not needed yet, could be removed but will be needed when checking for blocks / captures)
+                //    for (int col = 0; col < board.Length; col++)
+                //    {
+                //        if (IsPieceMoveLegal(board, new Move(row, col, kingPos[0], kingPos[1]), player))
+                //        {
+                //            checkingPiecesCount++;
+                //            checkingPieces.Add(row);
+                //            checkingPieces.Add(col);
+                //        }
+                //    }
+                //}
+
+                //if (checkingPiecesCount >= 2) return true; //if double checked and the king cant move, game is over
+
+                ////get the path, this only runs if the king can't move AND there is 1 piece checking, otherwise the game isnt over, so we know checkingPieces only has 2 elements
+                //int[][] checkingPaths = GetPiecePathPositions(board, new Move((int)checkingPieces[0], (int)checkingPieces[1], kingPos[0], kingPos[1]));
+                //foreach (int[] pathSquare in checkingPaths)
+                //{
+                //    for (int row = 0; row < board.Length; row++)
+                //    {
+                //        for (int col = 0; col < board.Length; col++)
+                //        {
+                //            if (IsPieceOwnedByPlayer(board[row][col], player) && IsPieceMoveLegal(board, new Move(row, col, pathSquare[0], pathSquare[1]), player))
+                //            {
+                //                //if the piece at row,col is the players and can move to the current path square, it can block the check or take the checking piece.
+                //                return false;
+                //            }
+                //        }
+                //    }
+                //}
+
+
 
                 return true;
                 
