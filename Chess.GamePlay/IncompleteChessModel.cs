@@ -328,11 +328,12 @@ namespace Chess.GamePlay
         }
 
         private int[][] GetPiecePathPositions(char[][] board, Move move)
-        {   //get path positions INCLUDING start position to be able to check for capture
+        {   //get the path positions where pieces could move to block check INCLUDING start position to be able to check for capture
+            //essentially Is<Piece>MovementValid with ambiguous piece, and return the path
             int rowDifference = move.toRow - move.fromRow;
             int columnDifference = move.toColumn - move.fromColumn;
 
-            if (board[move.fromRow][move.fromColumn].ToString().ToLower() == "r") //if rook
+            if (board[move.fromRow][move.fromColumn].ToString().ToLower() == "r") //rook
             {
                 if(rowDifference == 0)
                 {
@@ -345,12 +346,12 @@ namespace Chess.GamePlay
                 }
             }
 
-            if(board[move.fromRow][move.fromColumn].ToString().ToLower() == "b")
+            if(board[move.fromRow][move.fromColumn].ToString().ToLower() == "b") //bishop
             {
                 return GetMovePathPositions(board, move.fromRow, move.fromColumn, Math.Abs(rowDifference), Math.Clamp(rowDifference, -1, 1), Math.Clamp(columnDifference, -1, 1));
             }
 
-            if (board[move.fromRow][move.fromColumn].ToString().ToLower() == "q")
+            if (board[move.fromRow][move.fromColumn].ToString().ToLower() == "q") //queen
             {
                 if (rowDifference == 0)
                 {
